@@ -33,17 +33,11 @@ if (tag==paste0("changebehavior2_",setting,"_",cohortsize, "_", date))
   params['usens.trace.nohiv.xneg',c(3:5)] <- params['usens.trace.nohiv.xneg',c(3:5)]*0.99
   params['usens.trace.nohiv.xpos',c(3:5)] <- params['usens.trace.nohiv.xpos',c(3:5)]*0.99
   
-  params['unspec.trace.nohist.xneg',c(3:5)] <- params['unspec.trace.nohist.xneg',c(3:5)]*0.99
-  params['unspec.trace.nohist.xpos',c(3:5)] <- params['unspec.trace.nohist.xpos',c(3:5)]*0.99
-  params['unspec.trace.hist.xneg',c(3:5)] <- params['unspec.trace.hist.xneg',c(3:5)]*0.99
-  params['unspec.trace.hist.xpos',c(3:5)] <- params['unspec.trace.hist.xpos',c(3:5)]*0.99
+  params['unspec.trace.nohist.xneg',c(3:5)] <- params['unspec.trace.nohist.xneg',c(3:5)]*0.01
+  params['unspec.trace.nohist.xpos',c(3:5)] <- params['unspec.trace.nohist.xpos',c(3:5)]*0.01
+  params['unspec.trace.hist.xneg',c(3:5)] <- params['unspec.trace.hist.xneg',c(3:5)]*0.01
+  params['unspec.trace.hist.xpos',c(3:5)] <- params['unspec.trace.hist.xpos',c(3:5)]*0.01
 }
-
-if (tag==paste0("changebehavior_empiric_",setting,"_",cohortsize, "_", date)) 
-{ 
-  params[paste0('empiric_ZA'),c(3:5)] <- params[paste0('empiric_ZA'),c(3:5)]*(1-0.20)
-}
-
 
 if (tag==paste0("chinaempiric_",setting,"_",cohortsize, "_", date)) 
 { 

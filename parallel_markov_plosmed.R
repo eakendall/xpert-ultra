@@ -2,10 +2,11 @@ setting <- commandArgs(trailingOnly=TRUE)[1] # ZA or India or China
 fix <- commandArgs(trailingOnly=TRUE)[2] # NA, or any parameters to be assigned fixed values, e.g. "tbdeath_untreated_rs_ZA"
 tag <- commandArgs(trailingOnly=TRUE)[3] # for distinguishing filenames, e.g. "samecfr", "lowprev", "overall", "pessimisticrr", "changebehavior", "chinaempiric", 'error'
 if (tag=='error') taskid <- paste0('.', commandArgs(trailingOnly=TRUE)[4]) else taskid <- ''
+if (tag=='changebehavior_empiric') empiricdiff <- 0.2 else empiricdiff <- 0
 
 print(paste0("tag is ",tag))
 
-date <- "20170623"
+date <- "20170627"
 
 require('triangle'); require('lhs'); require(parallel)
 
@@ -27,7 +28,7 @@ if(!is.na(fix)) vary[which(rownames(params)==fix)] <- FALSE
 lhs <- randomLHS(nsims, sum(vary))
 
 header <- c(rownames(params), 
-            paste0(rep(c("assaydetected", "treated", "tbrxdeath" , "otherrxdeath", "rxcure", "rxfail", "rxfailtbdeath", "othertbdeath", "tbdeaths", "tbdeaths2", 
+            paste0(rep(c("assaydetected", "treated", "tbrxdeath" , "otherrxdeath", "rxcure", "rxfail", "rxfailtbdeath", "othertbdeath", "tbdeaths", "tbdeaths2", "dsdeaths",
               "unnecessary", "unnecessary2", "assayfalsepos", "unnecessaryRR", "unnecessaryRR2", "missed", "missedRR", "cost", "ongoingtransmission", "ongoingtransmissionRR"), each=5), 
                    c(".x", ".notrace", ".u", ".condtrace", ".reptrace")))
 write(header, file=paste0(savelocation,"markovoutput_",runname,".csv"), ncolumns=length(header), append = FALSE, sep=",")
@@ -81,7 +82,7 @@ params$beta[params$shape=="beta"] <- estBetaParams(params$estimate[params$shape=
                                                    (((params$high-params$low)/4)^2)[params$shape=="beta"])$beta
 
 
-onerun <- function(n, lhs, params, vary, readcohort, fix)
+onerun <- function(n, lhs, params, vary, readcohort, fix, empiricdiff=0)
 {
   ##################################
   ## sample parameters for each run ##
@@ -108,10 +109,14 @@ onerun <- function(n, lhs, params, vary, readcohort, fix)
 
 readcohort$xperttreat <- choosetreat(readcohort$xpertresult, readcohort$TB, empiric)
 
-readcohort$tracetreat[readcohort$traceresult!=readcohort$xpertresult] <- choosetreat(
+if (empiricdiff>0)
+{readcohort$tracetreat <- choosetreat( #lose correlation with xpert decision here, unfortunately
+  readcohort$traceresult, readcohort$TB, empiric*(1-empiricdiff))
+} else 
+{readcohort$tracetreat[readcohort$traceresult!=readcohort$xpertresult] <- choosetreat(
     readcohort$traceresult[readcohort$traceresult!=readcohort$xpertresult], readcohort$TB[readcohort$traceresult!=readcohort$xpertresult], empiric)
   readcohort$tracetreat[readcohort$traceresult==readcohort$xpertresult] <- readcohort$xperttreat[readcohort$traceresult==readcohort$xpertresult]
-  
+}  
 readcohort$notracetreat[readcohort$notraceresult==readcohort$xpertresult] <- readcohort$xperttreat[readcohort$notraceresult==readcohort$xpertresult]
   readcohort$notracetreat[readcohort$notraceresult==readcohort$traceresult] <- readcohort$tracetreat[readcohort$notraceresult==readcohort$traceresult]
   if(sum((readcohort$notraceresult!=readcohort$traceresult)&(readcohort$notraceresult!=readcohort$xpertresult))>0)
@@ -237,7 +242,7 @@ readcohort$currentstate <- NA;
    }
   
   #  and track all outcomes
-assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxfailtbdeath <- othertbdeath <- tbdeaths <- tbdeaths2 <- 
+assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxfailtbdeath <- othertbdeath <- tbdeaths <- tbdeaths2 <- dsdeaths <- 
   unnecessary <- unnecessary2 <- assayfalsepos <- unnecessaryRR <- unnecessaryRR2 <- missed <- missedRR <- cost <- ongoingtransmission <- ongoingtransmissionRR <- numeric()
 
   for (assay in c("xpert", "notrace", "trace", "conditional", "repeattrace"))
@@ -259,6 +264,8 @@ assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxf
                            sum(readcohort$TB & finalcohort[[assay]]$failed & finalcohort[[assay]]$currentstate=="tbdeath", na.rm=T)+
                            sum(readcohort$TB & !finalcohort[[assay]]$treated  & finalcohort[[assay]]$currentstate=="tbdeath", na.rm=T) )
     
+    dsdeaths <-  append(dsdeaths, 
+                        sum(!(readcohort$RR)&(finalcohort[[assay]]$currentstate=="tbdeath"), na.rm=T)+ sum(!(readcohort$RR)&(finalcohort[[assay]]$currentstate=="tbrxdeath"), na.rm=T ))
     
     unnecessary <- append( unnecessary, sum(finalcohort[[assay]]$unnecessaryRx, na.rm = T))
     unnecessary2 <- append( unnecessary2, sum(finalcohort[[assay]][paste0(assay,"treat")]=="unnecessaryRx", na.rm = T))
@@ -283,7 +290,7 @@ assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxf
   }
   
   out <- c(out, c(tempparams$estimate, 
-                  assaydetected, treated, tbrxdeath, otherrxdeath, rxcure, rxfail, rxfailtbdeath, othertbdeath, tbdeaths, tbdeaths2, 
+                  assaydetected, treated, tbrxdeath, otherrxdeath, rxcure, rxfail, rxfailtbdeath, othertbdeath, tbdeaths, tbdeaths2, dsdeaths,
                     unnecessary, unnecessary2,assayfalsepos, unnecessaryRR, unnecessaryRR2, missed, missedRR, cost, ongoingtransmission, ongoingtransmissionRR))
   
   print(n)
@@ -292,6 +299,6 @@ assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxf
   
 }
 
-pruns <- mclapply(X = 1:nsims, FUN = onerun, lhs = lhs, params=params, vary=vary, fix=fix, readcohort=readcohort, mc.cores=cores)
+pruns <- mclapply(X = 1:nsims, FUN = onerun, lhs = lhs, params=params, vary=vary, fix=fix, empiricdiff=empiricdiff, readcohort=readcohort, mc.cores=cores)
 
 write(unlist(pruns), file=paste0(savelocation,"markovoutput_",runname, taskid,".csv"), ncolumns=length(header), append = TRUE, sep=",")
