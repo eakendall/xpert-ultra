@@ -270,4 +270,4 @@ assaydetected <- treated <- tbrxdeath <- otherrxdeath <- rxcure <- rxfail <- rxf
 pruns <- mclapply(X = 1:nsims, FUN = onerun, lhs = lhs, params=params, vary=vary, fix=fix, empiricdiff=empiricdiff, readcohort=readcohort, mc.cores=cores)
 
 # write results to file
-write(unlist(pruns), file=paste0(savelocation,"markovoutput_",runname, taskid,".csv"), ncolumns=length(header), append = TRUE, sep=",")
+write(unlist(pruns), file=paste0(savelocation,"markovoutput_",runname, ".csv"), ncolumns=length(header), append = TRUE, sep=",")

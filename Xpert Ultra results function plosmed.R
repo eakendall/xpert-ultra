@@ -16,3 +16,7 @@ getmainresults <- function(setting, tag, date, chg=F, header=T)
     'diffs' = (1000/100000*apply(diffs,2, quantile, q,na.rm = T))[,c('tbdeaths','unnecessary')], 
     'ratio' = quantile(diffratio,q,na.rm = T))) 
 }
+
+
+# for example: 
+getmainresults("India", "highinc", "20170627")
