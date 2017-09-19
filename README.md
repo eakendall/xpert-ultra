@@ -10,12 +10,11 @@
 
 ## To run the model: 
 
-If not using sbactch script (ultramarkov.sh),
-edit first three lines of Xpert_Ultra_run_model_plosmed.R to specificy the setting, any fixed parameters ("NA" if none), and a 'tag' for the version of the parameters or model to run (see list below). 
+Edit first three lines of Xpert_Ultra_run_model_plosmed.R to specificy the setting, any fixed parameters ("NA" if none), and a 'tag' for the version of the parameters or model to run (see list below). 
 
 Can also edit 'date' (line 7) to change the date label on output files, and cohortsize and nsims (lines 9-10) to change the number of patients modeled in the cohort and the number of simulations to be run of the cohort.
 
-Output will be saved to file 'paste0(savelocation,"markovoutput_",runname, taskid,".csv")', ncolumns=length(header), append = TRUE, sep=",")'
+Output will be saved to file 'paste0(savelocation,"markovoutput_",runname, ".csv")', ncolumns=length(header), append = TRUE, sep=",")'
 
 
 
