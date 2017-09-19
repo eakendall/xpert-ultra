@@ -10,11 +10,11 @@ cohortsize <- 100000
 nsims <- 5000
 
 varyassay <- T # whether or not assay-related parameters are varied through LHS
+require('triangle'); require('lhs'); require(parallel)
 cores <-detectCores(); savelocation <- "../scratch/ultradata/"
 #   cores <- 1; savelocation <- ""
 runname <- paste0(tag,"_",setting,"_",cohortsize,"_",date) 
 
-require('triangle'); require('lhs'); require(parallel)
 print(paste0("tag is ",tag))
 
 
