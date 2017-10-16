@@ -32,3 +32,6 @@ The output file, which contains a large number of different results for each sim
 - "changebehavior" for the sensitivity analyses in which clinicians use a second test with Ultra to try to improve specificity, with characteristics similar to xray
 - "changebehavior2" to use a highly accurate second test with Ultra to improve specificity with little cost to sensitivity
 
+## Underlying data
+The data from the diagnostic accuracy (Dorman, Schumacher, et al 2017) that directly informed this model can be found in the file, Ultra study data for model.pptx.
+
